@@ -1,0 +1,80 @@
+version: '7'
+services:
+  elasticsearch:
+    image: elasticsearch:8.14.3
+    container_name: elasticsearch
+    environment:
+      - node.name=elasticsearch
+      - discovery.type=single-node
+      - cluster.name=docker-cluster
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - ELASTIC_USERNAME=elastic
+      - ELASTIC_PASSWORD=password
+      - KIBANA_PASSWORD=password
+      - LOGSTASH_PASSWORD=password
+      - xpack.security.enrollment.enabled=true
+    ports:
+      - "9200:9200"
+    volumes:
+      - d:/docker/elasticsearch/data:/usr/share/elasticsearch/data
+
+  kibana:
+    image: kibana:8.14.3
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=password
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+
+  logstash:
+    image: logstash:8.14.3
+    container_name: logstash
+    volumes:
+      - d:/docker/logstash/pipeline:/usr/share/logstash/pipeline
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=logstash_system
+      - ELASTICSEARCH_PASSWORD=password
+    ports:
+      - "5044:5044"
+    depends_on:
+      - elasticsearch
+
+  filebeat_service1:
+    build:
+      context: ./filebeat/service1
+    container_name: filebeat_service1
+    volumes:
+      - d:/docker/logs/service1:/var/log/service1
+    user: root
+    depends_on:
+      - logstash
+
+  filebeat_service2:
+    build:
+      context: ./filebeat/service2
+    container_name: filebeat_service2
+    volumes:
+      - d:/docker/logs/service2:/var/log/service2
+    user: root
+    depends_on:
+      - logstash
+  
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    depends_on:
+      - elasticsearch
+volumes:
+  esdata:
+    driver: local

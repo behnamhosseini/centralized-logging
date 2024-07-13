@@ -1,0 +1,12 @@
+filebeat.inputs:
+- type: log
+  enabled: true
+  paths:
+        - /var/log/service1/*.log
+  fields:
+    service: "service1"
+    environment: "production"
+  scan_frequency: 10s
+
+output.logstash:
+  hosts: ["logstash:5044"]

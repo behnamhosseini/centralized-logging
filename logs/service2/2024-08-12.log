@@ -1,0 +1,2 @@
+{"reservation_id": "654321", "timestamp": "2024-08-12T11:00:00Z", "service": "go_service", "stage": "initialize_payment", "status": "initiated", "message": "Payment process started by user.", "user_id": "user456", "ip_address": "192.168.1.2"}
+{"reservation_id": "654321", "timestamp": "2024-08-12T11:10:00Z", "service": "go_service", "stage": "complete_payment", "status": "success", "message": "Payment completed successfully.", "user_id": "user456", "ip_address": "192.168.1.2"}
